@@ -6,7 +6,7 @@ const EditForm = ({ topic, isOpen, onClose, onEditCard, section, newCardForm, ha
     return (
         isOpen && (
             <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-md shadow-md">
-                <h3 className="text-xl font-bold mb-4">Edit Card - {section}</h3>
+                <h3 className="text-xl font-bold mb-4">Edit Cards - {section}</h3>
                 <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
                         type="button"
