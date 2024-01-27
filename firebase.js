@@ -4,13 +4,13 @@ import { getDatabase } from "firebase/database";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDiNLjf19bW0-5cvkOtdlqYI7YiDzt3WA0",
-  authDomain: "reifenhauser-2d366.firebaseapp.com",
-  projectId: "reifenhauser-2d366",
-  storageBucket: "reifenhauser-2d366.appspot.com",
-  messagingSenderId: "1000320736803",
-  appId: "1:1000320736803:web:c9db2603f14597edf45b96",
-  measurementId: "G-80E388KDKZ",
+  apiKey: "AIzaSyCMkQRCI7WSHHpKNdK91DC0DLcFw56Ohlg",
+  authDomain: "facultyport.firebaseapp.com",
+  databaseURL: "https://facultyport-default-rtdb.firebaseio.com",
+  projectId: "facultyport",
+  storageBucket: "facultyport.appspot.com",
+  messagingSenderId: "296505134325",
+  appId: "1:296505134325:web:3e506795892779742249bc"
 };
 
 const app = initializeApp(firebaseConfig);

@@ -39,7 +39,7 @@ export default function SideBar() {
                     <div className="z-40 h-screen" onClick={()=>{setIsOpen(false)}}>
                         <div className="bg-base h-full z-50 p-3 w-[300px]">
                             <div className="flex flex-row justify-between">
-                                <img className='sm:h-[45px] sm:w-[90px] h-6 w-10' src='https://res.cloudinary.com/dzhdarh4q/image/upload/v1699014385/Reifenhauser/ReifenhauserLogo_hhc7wi.svg' alt='Logo' />
+                             
                                 <button className="text-primary text-3xl p-4" onClick={toggleSidebar} >
                                     <Icon icon="tabler:x" />
                                 </button>
@@ -47,14 +47,14 @@ export default function SideBar() {
 
                             <div>
                                 <ul className='flex flex-col gap-5 mt-5'>
-                                    <Nav title={"Home Banner"} destination={""} />
-                                    <Nav title={"Events"} destination={"Events"} />
-                                    <Nav title={"Testimonials"} destination={"Testimonials"} />
-                                    <Nav title={"Principals"} destination={"Principals"} />
-                                    <Nav title={"Media"} destination={"Media"} />
-                                    <Nav title={"Careers"} destination={"Careers"} />
-                                    <Nav title={"Contact us"} destination={"ContactUs"} />
-                                    <Nav title={"Newsletter Subscription"} destination={"Newsletter"} />
+                                    {/* <Nav title={"Home Banner"} destination={""} />
+                                    <Nav title={"Events"} destination={"Events"} /> */}
+                                    <Nav title={"Blogs"} destination={"Blogs"} />
+                                    <Nav title={"ResearchPaper"} destination={"ResearchPaper"} />
+                                    <Nav title={"Students"} destination={"Students"} />
+                                    {/* <Nav title={"Careers"} destination={"Careers"} />
+                                    <Nav title={"Contact us"} destination={"ContactUs"} /> */}
+                                    <Nav title={"Materials"} destination={"Materials"} />
                                 </ul>
                             </div>
                         </div>

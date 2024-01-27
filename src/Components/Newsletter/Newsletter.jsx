@@ -1,166 +1,223 @@
-import { useEffect, useState } from "react";
-import { onValue, ref, getDatabase, remove, child, } from 'firebase/database';
-import { Icon } from "@iconify/react";
-import { CSVLink } from "react-csv";
+// AdminPanel.jsx
+import React, { useEffect, useState } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, onValue, remove, set, push } from 'firebase/database';
 
-export default function Newsletter() {
-    const [newsletterData, setNewsletterData] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(5);
+const firebaseConfig = {
+  apiKey: "AIzaSyCMkQRCI7WSHHpKNdK91DC0DLcFw56Ohlg",
+  authDomain: "facultyport.firebaseapp.com",
+  databaseURL: "https://facultyport-default-rtdb.firebaseio.com",
+  projectId: "facultyport",
+  storageBucket: "facultyport.appspot.com",
+  messagingSenderId: "296505134325",
+  appId: "1:296505134325:web:3e506795892779742249bc"
+};
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const dbRef = ref(getDatabase(), 'newsletter-subscription');
+const initialTestimonialState = {
+  title:'',
+  description: '',
+  link:'',
+};
 
-            try {
-                onValue(dbRef, (snapshot) => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        const dataArray = Object.values(data);
+function TestAdmin() {
+  const [testimonials, setTestimonials] = useState([]);
+  const [testimonial, setTestimonial] = useState(initialTestimonialState);
+  const [editingId, setEditingId] = useState(null);
 
-                        setNewsletterData(dataArray);
-                    }
-                });
-            } catch (error) {
-                console.error('Error fetching data: ', error);
-            }
+  useEffect(() => {
+    const firebaseApp = initializeApp(firebaseConfig);
+    const database = getDatabase(firebaseApp);
+    const testimonialsRef = ref(database, 'materials');
+
+    onValue(testimonialsRef, (snapshot) => {
+      const data = snapshot.val();
+      const testimonialsArray = [];
+
+      for (const uid in data) {
+        const testimonial = {
+          uid,
+          ...data[uid],
         };
 
-        fetchData();
+        testimonialsArray.push(testimonial);
+      }
 
-        // Cleanup function to detach listeners if needed
-        return () => {
-            // Remove listeners or perform cleanup (if applicable)
-        };
-    }, []);
+      setTestimonials(testimonialsArray);
+    });
+  }, []);
 
-    // Function to copy email to clipboard
-    const copyToClipboard = (email) => {
-        navigator.clipboard.writeText(email);
-        // Optionally show a message or perform any other action after copying
+  const handleDelete = (uid) => {
+    const firebaseApp = initializeApp(firebaseConfig);
+    const database = getDatabase(firebaseApp);
+    const testimonialRef = ref(database, `materials/${uid}`);
+    remove(testimonialRef);
+  };
+
+  const handleEdit = (uid) => {
+    setEditingId(uid);
+    const editedTestimonial = testimonials.find((test) => test.uid === uid);
+    setTestimonial(editedTestimonial);
+  };
+
+  const handleUpdate = () => {
+    const firebaseApp = initializeApp(firebaseConfig);
+    const database = getDatabase(firebaseApp);
+    const testimonialRef = ref(database, `materials/${editingId}`);
+    set(testimonialRef, testimonial);
+    setEditingId(null);
+    setTestimonial(initialTestimonialState);
+  };
+
+  const handleAdd = () => {
+    const firebaseApp = initializeApp(firebaseConfig);
+    const database = getDatabase(firebaseApp);
+    const testimonialsRef = ref(database, 'materials');
+    const newTestimonialRef = push(testimonialsRef);
+    set(newTestimonialRef, testimonial);
+    setTestimonial(initialTestimonialState);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+  
+    // Define limits for each field
+    const maxLength = {
+      title:100,
+      description: 500,
     };
+  
+    // Check if the value exceeds the maximum length
+    if (value.length > maxLength[name]) {
+      // Display a warning pop-up
+      alert(`${name} should not exceed ${maxLength[name]} characters.`);
+      
+      // Truncate the value to the maximum length
+      const truncatedValue = value.slice(0, maxLength[name]);
+  
+      setTestimonial((prevTestimonial) => ({
+        ...prevTestimonial,
+        [name]: truncatedValue,
+      }));
+    } else {
+      // If the value is within the limit, update the state directly
+      setTestimonial((prevTestimonial) => ({
+        ...prevTestimonial,
+        [name]: value,
+      }));
+    }
+  };
+  
+  
 
-    // Function to handle pagination
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = newsletterData.slice(indexOfFirstItem, indexOfLastItem);
-
-    const paginate = (pageNumber) => {
-        setCurrentPage(pageNumber);
-    };
-
-    const handleItemsPerPageChange = (e) => {
-        setItemsPerPage(Number(e.target.value));
-        setCurrentPage(1); // Reset to the first page when changing items per page
-    };
-
-
-    const convertToIST = (timestamp) => {
-        return new Date(timestamp).toLocaleString('en-US', {
-            timeZone: 'Asia/Kolkata',
-        });
-    };
+  return (
+    <div className="container mx-auto mt-10">
+      <h2 className="text-4xl font-bold mb-6"></h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {testimonials.map((test) => (
+          <div key={test.uid} className="bg-gray-100 p-4 rounded-lg shadow-md">
+            <h3 className="text-lg font-bold mb-2">Edit Material</h3>
+            
+            <label className="block mb-2">
+              Title:
+              <input
+                type="text"
+                name="title"
+                value={editingId === test.uid ? testimonial.title : test.title}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                disabled={editingId !== test.uid}
+              />
+            </label>
     
-    const csvData = newsletterData.map(({ email, timestamp }) => ({
-        Email: email,
-        Timestamp: convertToIST(timestamp),
-    }));
+            <label className="block mb-2">
+              Description:
+              <input
+                type="text"
+                name="description"
+                value={editingId === test.uid ? testimonial.description : test.description}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                disabled={editingId !== test.uid}
+              />
+            </label>
+            <label className="block mb-2">
+              Link:
+              <input
+                type="text"
+                name="link"
+                value={editingId === test.uid ? testimonial.link : test.link}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded"
+                disabled={editingId !== test.uid}
+              />
+            </label>
+            {editingId === test.uid ? (
+              <button
+                onClick={handleUpdate}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
+              >
+                Update Paper
+              </button>
+            ) : (
+              <button
+                onClick={() => handleEdit(test.uid)}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
+              >
+                Edit
+              </button>
+            )}
+            <button
+              onClick={() => handleDelete(test.uid)}
+              className="bg-red-500 text-white px-4 py-2 rounded-md mt-2 ml-2"
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+      </div>
 
-    const handleDeleteClick = (contactId) => {
-        if (window.confirm('Are you sure you want to delete this ?')) {
-            const db = getDatabase();
-            const contactRef = ref(db, `newsletter-subscription/${contactId}`);
-            remove(contactRef)
-                .then(() => {
-                    console.log('Contact deleted successfully');
-                    // Optionally perform any other actions after deletion
-                })
-                .catch((error) => {
-                    console.error('Error deleting contact:', error);
-                    // Handle errors or show error messages
-                });
-        }
-    };
-
-    const today = new Date();
-    const formattedDate = `${today.getFullYear()}-${(today.getMonth() + 1)
-        .toString()
-        .padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-
-
-    return (
-        <div className="py-8">
-            <div className="flex flex-row justify-between w-[70%]">
-                <h1 className="text-3xl font-bold mb-4 first-letter:capitalize">Newsletter Subsription</h1>
-                <div>
-                    <CSVLink data={csvData} filename={`Newsletter-subscriptions_${formattedDate}.csv`} className="cursor-pointer px-3 py-1 bg-green-500 text-white rounded-md ml-2">
-                        Export as excel
-                    </CSVLink>
-                </div>
-            </div>
-
-            <table className="w-[70%] divide-y divide-gray-200 border border-black">
-                {/* Table headers */}
-                <thead className="bg-gray-200 border border-black">
-                    <tr>
-                        <th className="w-[70px] border text-center border-black px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">S.NO</th>
-                        <th className="w-[500px] text-center border border-black px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th className="text-center border border-black px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                        <th className="text-center border border-black px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                    </tr>
-                </thead>
-                <tbody className="bg-white divide-gray-200">
-                    {/* Table rows */}
-                    {currentItems.map((nl, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                            <td className="border border-black px-6 py-4">{indexOfFirstItem + index + 1}</td>
-                            <td className="border border-black px-6 py-4 cursor-pointer" onClick={() => copyToClipboard(nl.email)}>{nl.email}</td>
-                            <td className="border border-black px-6 py-4">{convertToIST(nl.timestamp)}</td>
-                            <td className='border border-black px-6 py-4 cursor-pointer' onClick={() => handleDeleteClick(nl.id)}>
-                                <Icon icon="mdi:delete" />
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            {/* Pagination */}
-            <div className="flex justify-between items-center mt-10 w-[70%]">
-                <div>
-                    <select
-                        className="cursor-pointer px-3 py-1 bg-gray-200 rounded-md"
-                        onChange={handleItemsPerPageChange}
-                        value={itemsPerPage}
-                    >
-                        <option value="2">2</option>
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="15">15</option>
-                    </select>
-                    <span className="ml-2">Items per page</span>
-                </div>
-                <div>
-                    <nav className="flex items-center">
-                        <button
-                            onClick={() => paginate(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className="cursor-pointer bg-primary text-white px-3 py-1 rounded-md mr-2"
-                        >
-                            Previous
-                        </button>
-                        <div className="px-3 py-1">
-                            Page {currentPage} of {Math.ceil(newsletterData.length / itemsPerPage)}
-                        </div>
-                        <button
-                            onClick={() => paginate(currentPage + 1)}
-                            disabled={indexOfLastItem >= newsletterData.length}
-                            className="cursor-pointer px-3 py-1 bg-primary text-white rounded-md ml-2"
-                        >
-                            Next
-                        </button>
-                    </nav>
-                </div>
-            </div>
-        </div>
-    );
+      <div className="mt-8">
+        <h3 className="text-2xl font-bold mb-4">Add Material</h3>
+        <label className="block mb-2">
+          Title
+          <input
+            type="text"
+            name="title"
+            value={testimonial.title}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </label>
+      
+        <label className="block mb-2">
+          Description:
+          <input
+            type="text"
+            name="description"
+            value={testimonial.description}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </label>
+        <label className="block mb-2">
+          Link:
+          <input
+            type="text"
+            name="link"
+            value={testimonial.link}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </label>
+        <button
+          onClick={handleAdd}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
+        >
+          Add Material
+        </button>
+      </div>
+    </div>
+  );
 }
+
+export default TestAdmin;

@@ -4,20 +4,17 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue, remove, set, push } from 'firebase/database';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDiNLjf19bW0-5cvkOtdlqYI7YiDzt3WA0",
-  authDomain: "reifenhauser-2d366.firebaseapp.com",
-  projectId: "reifenhauser-2d366",
-  storageBucket: "reifenhauser-2d366.appspot.com",
-  messagingSenderId: "1000320736803",
-  appId: "1:1000320736803:web:c9db2603f14597edf45b96",
-  measurementId: "G-80E388KDKZ",
+  apiKey: "AIzaSyCMkQRCI7WSHHpKNdK91DC0DLcFw56Ohlg",
+  authDomain: "facultyport.firebaseapp.com",
+  databaseURL: "https://facultyport-default-rtdb.firebaseio.com",
+  projectId: "facultyport",
+  storageBucket: "facultyport.appspot.com",
+  messagingSenderId: "296505134325",
+  appId: "1:296505134325:web:3e506795892779742249bc"
 };
 
 const initialTestimonialState = {
-  buttonText: '',
-  pos: '',
-  kl: '',
-  poss: '',
+  title:'',
   description: '',
 };
 
@@ -29,7 +26,7 @@ function TestAdmin() {
   useEffect(() => {
     const firebaseApp = initializeApp(firebaseConfig);
     const database = getDatabase(firebaseApp);
-    const testimonialsRef = ref(database, 'testimonials');
+    const testimonialsRef = ref(database, 'blogs');
 
     onValue(testimonialsRef, (snapshot) => {
       const data = snapshot.val();
@@ -51,7 +48,7 @@ function TestAdmin() {
   const handleDelete = (uid) => {
     const firebaseApp = initializeApp(firebaseConfig);
     const database = getDatabase(firebaseApp);
-    const testimonialRef = ref(database, `testimonials/${uid}`);
+    const testimonialRef = ref(database, `blogs/${uid}`);
     remove(testimonialRef);
   };
 
@@ -64,7 +61,7 @@ function TestAdmin() {
   const handleUpdate = () => {
     const firebaseApp = initializeApp(firebaseConfig);
     const database = getDatabase(firebaseApp);
-    const testimonialRef = ref(database, `testimonials/${editingId}`);
+    const testimonialRef = ref(database, `blogs/${editingId}`);
     set(testimonialRef, testimonial);
     setEditingId(null);
     setTestimonial(initialTestimonialState);
@@ -73,7 +70,7 @@ function TestAdmin() {
   const handleAdd = () => {
     const firebaseApp = initializeApp(firebaseConfig);
     const database = getDatabase(firebaseApp);
-    const testimonialsRef = ref(database, 'testimonials');
+    const testimonialsRef = ref(database, 'blogs');
     const newTestimonialRef = push(testimonialsRef);
     set(newTestimonialRef, testimonial);
     setTestimonial(initialTestimonialState);
@@ -81,11 +78,35 @@ function TestAdmin() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setTestimonial((prevTestimonial) => ({
-      ...prevTestimonial,
-      [name]: value,
-    }));
+  
+    // Define limits for each field
+    const maxLength = {
+      title:100,
+      description: 500,
+    };
+  
+    // Check if the value exceeds the maximum length
+    if (value.length > maxLength[name]) {
+      // Display a warning pop-up
+      alert(`${name} should not exceed ${maxLength[name]} characters.`);
+      
+      // Truncate the value to the maximum length
+      const truncatedValue = value.slice(0, maxLength[name]);
+  
+      setTestimonial((prevTestimonial) => ({
+        ...prevTestimonial,
+        [name]: truncatedValue,
+      }));
+    } else {
+      // If the value is within the limit, update the state directly
+      setTestimonial((prevTestimonial) => ({
+        ...prevTestimonial,
+        [name]: value,
+      }));
+    }
   };
+  
+  
 
   return (
     <div className="container mx-auto mt-10">
@@ -93,52 +114,20 @@ function TestAdmin() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {testimonials.map((test) => (
           <div key={test.uid} className="bg-gray-100 p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-bold mb-2">Edit Testimonial</h3>
-            <h6 className="text-xs mb-2">Do not fill both company with position as well as company without position</h6>
+            <h3 className="text-lg font-bold mb-2">Edit Blogs</h3>
+            
             <label className="block mb-2">
-              Name:
+              Title:
               <input
                 type="text"
-                name="buttonText"
-                value={editingId === test.uid ? testimonial.buttonText : test.buttonText}
+                name="title"
+                value={editingId === test.uid ? testimonial.title : test.title}
                 onChange={handleChange}
                 className="w-full p-2 border border-gray-300 rounded"
                 disabled={editingId !== test.uid}
               />
             </label>
-            <label className="block mb-2">
-              Position:
-              <input
-                type="text"
-                name="pos"
-                value={editingId === test.uid ? testimonial.pos : test.pos}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded"
-                disabled={editingId !== test.uid}
-              />
-            </label>
-            <label className="block mb-2">
-              Company with position:
-              <input
-                type="text"
-                name="kl"
-                value={editingId === test.uid ? testimonial.kl : test.kl}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded"
-                disabled={editingId !== test.uid}
-              />
-            </label>
-            <label className="block mb-2">
-              Company without position:
-              <input
-                type="text"
-                name="poss"
-                value={editingId === test.uid ? testimonial.poss : test.poss}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded"
-                disabled={editingId !== test.uid}
-              />
-            </label>
+    
             <label className="block mb-2">
               Description:
               <input
@@ -155,7 +144,7 @@ function TestAdmin() {
                 onClick={handleUpdate}
                 className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
               >
-                Update Testimonial
+                Update Blogs
               </button>
             ) : (
               <button
@@ -176,47 +165,18 @@ function TestAdmin() {
       </div>
 
       <div className="mt-8">
-        <h3 className="text-2xl font-bold mb-4">Add New Testimonial</h3>
+        <h3 className="text-2xl font-bold mb-4">Add New Blogs</h3>
         <label className="block mb-2">
           Name
           <input
             type="text"
-            name="buttonText"
-            value={testimonial.buttonText}
+            name="title"
+            value={testimonial.title}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded"
           />
         </label>
-        <label className="block mb-2">
-          Position:
-          <input
-            type="text"
-            name="pos"
-            value={testimonial.pos}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </label>
-        <label className="block mb-2">
-        Company with position:
-          <input
-            type="text"
-            name="kl"
-            value={testimonial.kl}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </label>
-        <label className="block mb-2">
-        Company without position:
-          <input
-            type="text"
-            name="poss"
-            value={testimonial.poss}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </label>
+      
         <label className="block mb-2">
           Description:
           <input
@@ -231,7 +191,7 @@ function TestAdmin() {
           onClick={handleAdd}
           className="bg-blue-500 text-white px-4 py-2 rounded-md mt-2"
         >
-          Add Testimonial
+          Add Blogs
         </button>
       </div>
     </div>

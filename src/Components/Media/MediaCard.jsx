@@ -114,7 +114,7 @@ const AdminPanel = () => {
 
   return (
     <div style={{ textAlign: 'center', margin: 'auto', width: '80%', padding: '20px' }}>
-      <h2 style={{ fontSize: '32px', color: '#013A98' }}>Admin Panel</h2>
+      {/* <h2 style={{ fontSize: '32px', color: '#013A98' }}>Admin Panel</h2>
 
       <button
         style={{
@@ -136,6 +136,8 @@ const AdminPanel = () => {
       <label htmlFor="image" className="block text-gray-700 text-sm font-bold mb-2">
         Image:
       </label>
+      <br></br>
+      <h6>Please provide same dimension of all images in this section preferrably (550 * 550)</h6>
       <input
         type="file"
         id="image"
@@ -184,6 +186,8 @@ const AdminPanel = () => {
       <label htmlFor="image" className="block text-gray-700 text-sm font-bold mb-2">
         Image:
       </label>
+      <br></br>
+      <h6>Please provide same dimension of all images in this section preferrably (550 * 550)</h6>
       <input
         type="file"
         id="image"
@@ -241,7 +245,7 @@ const AdminPanel = () => {
             </button>
           </div>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };
