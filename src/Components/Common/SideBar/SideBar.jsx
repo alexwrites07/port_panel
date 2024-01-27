@@ -31,7 +31,7 @@ export default function SideBar() {
                             </button>
                             <h1 className="text-2xl font-bold p-4 capitalize">{location}</h1>
                         </div>
-                        <img className='sm:h-[60px] sm:w-[100px] h-6 w-10 mr-10' src='https://res.cloudinary.com/dzhdarh4q/image/upload/v1699014385/Reifenhauser/ReifenhauserLogo_hhc7wi.svg' alt='Logo' />
+                       
                     </div>
                 ) : (
 
